@@ -5,9 +5,9 @@ namespace App;
 
 class View
 {
-    public function render(string $page, array $params) : void
+    public function render(string $page, array $params, array $tableDays = null) : void
     {
-        include_once("templates\\layout.php");
+        include_once("templates/layout.php");
     }
 }
 

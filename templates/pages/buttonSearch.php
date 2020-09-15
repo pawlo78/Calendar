@@ -1,11 +1,18 @@
 <table class="GeneratedTable center">
   <thead>
     <tr>     
-      <th><h1>Header</h1></th>     
+      <th><h1><?php echo $params['year']. "-" .$params['mon']. "-" .$params['day']; ?></h1></th>     
     </trclass=>
   </theadclass=>  
 </table>
 
 <div class="col text-center">
-<button type="button" class="btn btn-primary btn-lg"><h1>Large button</h1></button>  
+
+
+
+<form action="index.php" method="get"> 
+<input type="hidden" name="year" value="<?=$params['year']; ?>">
+    <input type="hidden" name="mon" value="<?=$params['mon']; ?>">
+  <button type="submit" class="btn btn-primary btn-lg"><h1>Get date</h1></button>
+</form> 
 </div>

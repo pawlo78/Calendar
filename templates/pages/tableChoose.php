@@ -38,11 +38,19 @@
   <tbody>
       <?php 
         //test
-        $x=1; $y=8;
-        for ($i=0; $i < 7; $i++) {           
+        $x=0; $y=7;
+        for ($i=0; $i < 6; $i++) {           
           echo "<tr>";       
           for ($j=$x; $j < $y; $j++) {
-            echo "<td>$j</td>";
+            if(isset($tableDays[$j]))
+            {
+              if($tableDays[$j] == 0) {
+                echo "<td></td>";
+              } else {
+                echo "<td>" . $tableDays[$j] . "</td>";
+              }             
+            }
+            
           }      
           echo "</tr>"; 
           $x=$y;
