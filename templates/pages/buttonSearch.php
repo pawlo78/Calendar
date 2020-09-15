@@ -1,7 +1,15 @@
 <table class="GeneratedTable center">
   <thead>
     <tr>     
-      <th><h1><?php echo $params['year']. "-" .$params['mon']. "-" .$params['day']; ?></h1></th>     
+      <th><h1>
+      
+      <?php
+      strlen($params['mon']) == 1 ? $monView = "0".$params['mon'] : $monView = $params['mon'];    
+      strlen($params['day']) == 1 ? $dayView = "0".$params['day'] : $dayView = $params['day'];    
+      echo $params['year']. "-" .$monView. "-" .$dayView; 
+      ?>
+      
+      </h1></th>     
     </trclass=>
   </theadclass=>  
 </table>

@@ -38,6 +38,20 @@
         margin-left: auto;
         margin-right: auto;
         }
+
+        .button-calendary {
+        background-color: Transparent;
+        border: none;      
+        }
+
+        a:hover {
+          text-decoration: none;
+        }
+
+        a {
+          color: black;
+        }
+
     </style>
 
   </head>

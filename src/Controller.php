@@ -42,19 +42,36 @@ class Controller
 
 
     private function checkRequest() : array
-    {
+    {        
         $params = [];
         //Drawing a calendar when we change the date in it (month or year)        
         //sprawdzenie czy sa dane z get, czyli dane do wyswietlenia kalendarza
         if(isset($this->request['get']['year']) && isset($this->request['get']['mon'])) {           
+            
             //validation of the date 
-            if(preg_match('/^(19[0-9][0-9]|20[0-9][0-9])$/', $this->request['get']['year']) && preg_match('/^([1-9]|1[012])$/', $this->request['get']['mon']))  {
-                $params['year'] = (int) $this->request['get']['year'];
-                $params['mon'] = (int) $this->request['get']['mon'];           
-            } else {
-                $date = getdate();
-                $params['year'] = $date['year'];
-                $params['mon'] = $date['mon'];           
+            if(preg_match('/^(19[0-9][0-9]|20[0-9][0-9])$/', $this->request['get']['year']) && preg_match('/^([0-9]|1[0123])$/', $this->request['get']['mon']))  {
+                 //warunek, istnieje data ale jest przejscie z grudnia na styczen
+                //i odwrotnie - zmiana roku
+                if( (int) $this->request['get']['mon'] === 0) {                    
+                    $params['year'] = (int) $this->request['get']['year']-1;
+                    $params['mon'] = (int) 12;
+                    $params['monTxt'] = (string) $this->getMonTxt(12);                    
+                }
+                else if((int) $this->request['get']['mon'] === 13) {
+                    $params['year'] = (int) $this->request['get']['year']+1;
+                    $params['mon'] = (int) 1;
+                    $params['monTxt'] = (string) $this->getMonTxt(1); 
+                } else {                
+                    $params['year'] = (int) $this->request['get']['year'];
+                    $params['mon'] = (int) $this->request['get']['mon'];
+                    $params['monTxt'] = (string) $this->getMonTxt($params['mon']);           
+            } } else {               
+                    //ar_dump($this->request['get']);
+                    $date = getdate();
+                    $params['year'] = $date['year'];
+                    $params['mon'] = $date['mon'];
+                    $params['monTxt'] = (string) $this->getMonTxt($params['mon']);           
+                                      
             } 
             $params['page'] = "tableChoose";          
             return $params;        
@@ -63,7 +80,7 @@ class Controller
             //There are no variables $_GET (Start)
             //There are variables $_POST when we choose date        
             //Setting variables at the starting of the program               
-            if(!isset($this->request['post']['year']) && !isset($this->request['post']['mon'])) {            
+            if(!isset($this->request['post']['yearPost']) && !isset($this->request['post']['monPost'])) {            
                 $date = getdate();
                 $params['year'] = $date['year'];
                 $params['mon'] = $date['mon'];
@@ -112,10 +129,57 @@ class Controller
     //pobranie numeru dnia tygodnia, zeby wiedziec ile wolnych 
     //nienumerowanych pól jest na początku w kalendarzu
     //check the weekday number
-    public function getNoDayWeek($yearNoDa, $monNoDa, $dayNoDa) {
+    public function getNoDayWeek(int $yearNoDa, int $monNoDa, int $dayNoDa) : int {
         $dayWeek = date('N', strtotime($yearNoDa."-".$monNoDa."-".$dayNoDa));
-        return $dayWeek;
-    } 
+        return (int) $dayWeek;
+    }
+    
+
+    // get the text value of the month
+    public function getMonTxt(int $thMon) : string {              
+        switch ($thMon) {
+            case '1':
+                $monTxt = "January";
+                break;
+            case '2':
+                $monTxt = "February";
+                break;
+            case '3':
+                $monTxt = "March";
+                break;
+            case '4':
+                $monTxt = "April";
+                break;
+            case '5':
+                $monTxt = "May";
+                break;
+            case '6':
+                $monTxt = "June";
+                break;
+            case '7':
+                $monTxt = "July";
+                break;
+            case '8':
+                $monTxt = "August";
+                break;
+            case '9':
+                $monTxt = "September";
+                break;
+            case '10':
+                $monTxt = "October";
+                break;
+            case '11':
+                $monTxt = "November";
+                break;
+            case '12':
+                $monTxt = "December";               
+                break;
+            default:
+                $monTxt = "No month specified";
+                break;           
+        }
+        return $monTxt;
+    }
 
 
 
