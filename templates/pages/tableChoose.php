@@ -1,4 +1,3 @@
-
 <table class="GeneratedTable center">
   <thead>
     <tr>     
@@ -15,14 +14,13 @@
   <thead>
     <tr>     
       <th></th>     
-      <th><?php echo "<a href='index.php?year=".$params['year']."&mon=".($params['mon']-1)."'> <<< </a></th>"; ?></th>
+      <th><?php echo "<a href='index.php?year=".$params['yearSub']."&mon=".$params['monSub']."'> <<< </a></th>"; ?></th>
       <th><?php echo $params['monTxt']; ?></th>
-      <th><?php echo "<a href='index.php?year=".$params['year']."&mon=".($params['mon']+1)."'> >>> </a></th>"; ?></th>      
+      <th><?php echo "<a href='index.php?year=".$params['yearAdd']."&mon=".$params['monAdd']."'> >>> </a></th>"; ?></th>      
       <th></th>
     </trclass=>
   </theadclass=>  
 </table>
-
 
 <table class="GeneratedTable center">
   <thead>
@@ -37,32 +35,42 @@
     </trclass=>
   </theadclass=>
   <tbody>
-      <?php 
-        //test
+      <?php        
+        //start value - setting the days of the week
         $x=0; $y=7;
+        //maximum number of lines of weeks
         for ($i=0; $i < 6; $i++) {           
-          echo "<tr>";       
+          echo "<tr>";
+          //consecutive days of the week from the table       
           for ($j=$x; $j < $y; $j++) {
             if(isset($tableDays[$j]))
             {
+              //empty spaces
               if($tableDays[$j] == 0) {
                 echo "<td></td>";
               } else {
-
+                  //generating buttons
                  ?>
                 <form method='post' action='index.php' style='margin:0; padding:0;'>              
                 <input type="hidden" name="monPost" value="<?=$params['mon']; ?>">
                 <input type='hidden' name='yearPost' value="<?=$params['year']; ?>">
                 <?php                             
                 echo "<td>";
-                echo "<input class='button-calendary' type='submit' name='dayPost' value=" . $tableDays[$j] . ">";
+                echo "<input class='";
+                //class setting - mark the current day
+                if($params['flagRingDay'] === true && $tableDays[$j] === $params['mday']) {
+                  echo "btn btn-primary btn-circle btn-sm";
+                } else {
+                  echo "button-calendary";                  
+                }
+                echo "' type='submit' name='dayPost' value=" . $tableDays[$j] . ">";
                 echo "</td>"; 
                 echo "</form>";               
               }             
-            }
-            
+            }            
           }      
-          echo "</tr>"; 
+          echo "</tr>";
+          //new week 
           $x=$y;
           $y=$y+7;
         }

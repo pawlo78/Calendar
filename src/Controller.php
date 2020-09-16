@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App;
 require_once("View.php");
 
-
 class Controller 
 {
     private View $view;
@@ -12,105 +11,112 @@ class Controller
 
     function __construct(array $request)
     {
-        //przekazanie parametru z indeksu - tablic get i post
-        $this->request = $request;
-        //var_dump($request);
+        //$_GET and $_POST from index.php
+        $this->request = $request;       
         $this->view = new View();        
     }
 
-    //główna funkcja przetwarzająca przed przekazaniem parametów do layoutu
+
+    //main function - passing a parameter to layout
     public function run() : void
     {
-        //tabklica parametrów rok, miesiac i ktora strona wyswietlana
+        //an array of parameters for layout
         $viewParams = [];
-        //tablica z dniami i pustymi polami do przekazania
+        //array of the days of the month for layout
         $tableDays = [];
-        //check get and post and create parameters table 
-        $viewParams= $this->checkRequest();       
-        
-        //ustawienie strony ktora ma byc aktywna
+        //check (validate) get and post and create parameters table 
+        $viewParams= $this->checkRequest();        
+        //active page
         $page = $viewParams['page'];
-        //create table of day from year and mon
-        //generowanie tablicy do wyswietlenia w kalendarzu
+        //create table of days for year and month        
         if($page === "tableChoose")
         $tableDays = $this->createTableDay($viewParams);
 
-        //przekazanie parametrów do View
+        //passing parameters to View
         $this->view->render($page, $viewParams, $tableDays);
     }
 
 
-
     private function checkRequest() : array
     {        
+        
+        //an array with parameters
         $params = [];
-        //Drawing a calendar when we change the date in it (month or year)        
-        //sprawdzenie czy sa dane z get, czyli dane do wyswietlenia kalendarza
-        if(isset($this->request['get']['year']) && isset($this->request['get']['mon'])) {           
-            
-            //validation of the date 
-            if(preg_match('/^(19[0-9][0-9]|20[0-9][0-9])$/', $this->request['get']['year']) && preg_match('/^([0-9]|1[0123])$/', $this->request['get']['mon']))  {
-                 //warunek, istnieje data ale jest przejscie z grudnia na styczen
-                //i odwrotnie - zmiana roku
-                if( (int) $this->request['get']['mon'] === 0) {                    
-                    $params['year'] = (int) $this->request['get']['year']-1;
-                    $params['mon'] = (int) 12;
-                    $params['monTxt'] = (string) $this->getMonTxt(12);                    
-                }
-                else if((int) $this->request['get']['mon'] === 13) {
-                    $params['year'] = (int) $this->request['get']['year']+1;
-                    $params['mon'] = (int) 1;
-                    $params['monTxt'] = (string) $this->getMonTxt(1); 
-                } else {                
+        //if there are data from $_GET
+        if(isset($this->request['get']['year']) && isset($this->request['get']['mon'])) {            
+            //data validation 
+            if(preg_match('/^(19[0-9][0-9]|20[0-9][0-9])$/', $this->request['get']['year']) && preg_match('/^([0-9]|1[012])$/', $this->request['get']['mon']))  {
                     $params['year'] = (int) $this->request['get']['year'];
                     $params['mon'] = (int) $this->request['get']['mon'];
-                    $params['monTxt'] = (string) $this->getMonTxt($params['mon']);           
-            } } else {               
-                    //ar_dump($this->request['get']);
+                    $params['monTxt'] = (string) $this->getMonTxt($params['mon']);
+
+                    //change (set) of month and year when switching from December to January and vice versa
+                    if($this->request['get']['mon'] === "12") {
+                        $params['monAdd'] = "1";
+                        $params['yearAdd'] = $this->request['get']['year'] + 1;
+                    } else {
+                        $params['monAdd'] = $this->request['get']['mon'] + 1;
+                        $params['yearAdd'] = $this->request['get']['year'];
+                    }
+                    
+                    if($this->request['get']['mon'] === "1") {
+                        $params['monSub'] = "12";
+                        $params['yearSub'] = $this->request['get']['year'] - 1;
+                    } else {
+                        $params['monSub'] = $this->request['get']['mon'] - 1;
+                        $params['yearSub'] = $this->request['get']['year'];
+                    }
+                    
+                    $date = getdate();
+                    $params['mday'] = $date['mday'];
+                    $params['flagRingDay'] = $this->getRingDay(); 
+                    $params['page'] = "tableChoose";  
+                    
+             } else {                  
+                    //with wrong date format in $ _GET
                     $date = getdate();
                     $params['year'] = $date['year'];
                     $params['mon'] = $date['mon'];
-                    $params['monTxt'] = (string) $this->getMonTxt($params['mon']);           
-                                      
-            } 
-            $params['page'] = "tableChoose";          
+                    $params['day'] = $date['mday'];  
+                    $params['page'] = "buttonSearch";          
+                    return $params;  
+            }                   
             return $params;        
         } else {
             //Start and end of the application. Display label and button
             //There are no variables $_GET (Start)
             //There are variables $_POST when we choose date        
+            
             //Setting variables at the starting of the program               
             if(!isset($this->request['post']['yearPost']) && !isset($this->request['post']['monPost'])) {            
                 $date = getdate();
                 $params['year'] = $date['year'];
                 $params['mon'] = $date['mon'];
-                $params['day'] = $date['mday'];
-                $params['page'] = "buttonSearch";
+                $params['day'] = $date['mday'];                
             //read variables after date selection
             } else { 
                 $params['day'] = $this->request['post']['dayPost'];
                 $params['mon'] = $this->request['post']['monPost'];
-                $params['year'] = $this->request['post']['yearPost'];      
-                $params['page'] = "buttonSearch";
+                $params['year'] = $this->request['post']['yearPost'];                
             } 
+            $params['page'] = "buttonSearch";          
             return $params;
         }        
     }
 
-    //create table of day from year and mon
-    private function createTableDay(array $params) : array
-    {
-        
-        $forYear = $params['year'];
-        $forMon = $params['mon'];
+
+    //create table of days for year and month
+    private function createTableDay() : array
+    {        
+        $forYear = (int)$this->request['get']['year'];
+        $forMon = (int)$this->request['get']['mon'];
         $tableOfDays = [];
-        //sprawdzenie ktory dniem tygodnia bedzie 1 dzień miesiąca dla generowania pustych pól
+        //checking which day of the week will be the 1st of the month for generating empty fields
         $noDayOfWeek = $this->getNoDayWeek($forYear, $forMon, 1);
         for ($i=1; $i < $noDayOfWeek; $i++) { 
             $tableDays[] = 0; 
         }
-
-            //tworzenie tablizy z dniami po sprawdzeniu czy data istnieje
+        //creating a table with days after checking if the date exists
         for ($i=1; $i < 32; $i++) { 
             if($this->checkDateExist($forYear, $forMon, $i))
             {
@@ -120,23 +126,23 @@ class Controller
         return $tableDays;        
     }
 
+
     //check if the date exist
-    public function checkDateExist(int $yearChDt, int $monChDt, int $dayChDt) : bool {
+    private function checkDateExist(int $yearChDt, int $monChDt, int $dayChDt) : bool {
         $check = checkdate($monChDt, $dayChDt, $yearChDt);
         return $check;     
     }
 
-    //pobranie numeru dnia tygodnia, zeby wiedziec ile wolnych 
-    //nienumerowanych pól jest na początku w kalendarzu
-    //check the weekday number
-    public function getNoDayWeek(int $yearNoDa, int $monNoDa, int $dayNoDa) : int {
+  
+    //check the weekday number - blank fields in the days table
+    private function getNoDayWeek(int $yearNoDa, int $monNoDa, int $dayNoDa) : int {
         $dayWeek = date('N', strtotime($yearNoDa."-".$monNoDa."-".$dayNoDa));
-        return (int) $dayWeek;
+        return (int)$dayWeek;
     }
     
 
     // get the text value of the month
-    public function getMonTxt(int $thMon) : string {              
+    private function getMonTxt(int $thMon) : string {              
         switch ($thMon) {
             case '1':
                 $monTxt = "January";
@@ -179,6 +185,18 @@ class Controller
                 break;           
         }
         return $monTxt;
+    }
+
+    //flag for the current year and month
+    //mark the current day
+    private function getRingDay() : bool 
+    {
+        $date = getdate();        
+        if($this->request['get']['mon'] === (string)$date['mon'] &&  $this->request['get']['year'] === (string)$date['year']) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
