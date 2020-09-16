@@ -10,4 +10,3 @@ class View
         include_once("templates/layout.php");
     }
 }
-

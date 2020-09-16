@@ -1,19 +1,12 @@
-
-<table class="GeneratedTable center">
-  <thead>
-    <tr>     
-      <th><h1>
-      
-      <?php
-      strlen($params['mon']) == 1 ? $monView = "0".$params['mon'] : $monView = $params['mon'];    
-      strlen($params['day']) == 1 ? $dayView = "0".$params['day'] : $dayView = $params['day'];    
-      echo $params['year']. "-" .$monView. "-" .$dayView; 
-      ?>
-      
-      </h1></th>     
-    </trclass=>
-  </theadclass=>  
-</table>
+<div class="col text-center margin-top">
+  <h2>
+    <?php
+    strlen($params['mon']) == 1 ? $monView = "0".$params['mon'] : $monView = $params['mon'];    
+    strlen($params['day']) == 1 ? $dayView = "0".$params['day'] : $dayView = $params['day'];
+    echo $params['year']."-".$monView."-".$dayView;
+    ?>
+  </h2>
+</div>
 
 <div class="col text-center">
 <form action="index.php" method="get"> 
