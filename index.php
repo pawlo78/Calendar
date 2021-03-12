@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 require_once("src/Controller.php");
-//test
+//testtest
 $request = [
     'post' => $_POST,
     'get' => $_GET
